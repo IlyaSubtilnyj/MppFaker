@@ -31,7 +31,11 @@ namespace DataTransferObject
 
         public object get(string id)
         {
-
+            if (!this.has(id)) {
+            
+                throw new Exception("ti popusk");
+            }
+            
             return isset(id)
               ? this.objects[id]()
               : this.prepareObject(id);
