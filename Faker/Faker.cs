@@ -25,14 +25,11 @@ namespace DataTransferObject
 
             T? result = default(T);
 
-            var className = typeof(T).AssemblyQualifiedName;
-            if (className != null)
+            var className = typeof(T).AssemblyQualifiedName!;
+            if (container.has(className))
             {
-                if (container.has(className))
-                {
-                    result = (T)container.get(className); ///no exception like for (T)
-                }
-            }
+                result = (T)container.get(className);
+            }         
 
             return result!;
         }
