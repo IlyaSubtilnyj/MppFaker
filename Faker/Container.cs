@@ -47,7 +47,7 @@ namespace DataTransferObject
         }
 
 
-        public delegate object cctor(object?[]? args = null);
+        public delegate object cctor(object?[]? args);
 
         internal class ReflectionConstructor
         {
@@ -67,9 +67,9 @@ namespace DataTransferObject
                 }
                 return ctorParams;
             }
-            public cctor CreateFabricMethod()
+            public cctor Snapshot()
             {
-
+                ConstructorInfo ctor = this.ctor;
                 cctor closure = (object?[]? args) =>
                 {
                     return ctor.Invoke(args);
@@ -120,10 +120,10 @@ namespace DataTransferObject
                 args.Add(arg);
             }
 
-            var ctor = constructReflector.CreateFabricMethod();
-            objects.TryAdd(id, ctor);
+            var ctorDecorator = constructReflector.Snapshot();
+            objects.TryAdd(id, ctorDecorator);
 
-            return ctor(args.ToArray());
+            return ctorDecorator(args);
         }
 
     }
