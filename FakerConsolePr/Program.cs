@@ -7,10 +7,13 @@ namespace FakerConsolePr
 
         public int y;
 
-        public Foo() { }
-        public Foo(int x) { }
+        public Foo(int y) { 
+            this.y = y;
+        }
 
         public Foo(string x) { }
+
+        public Foo() { }
 
     }
     internal class Program
@@ -23,9 +26,7 @@ namespace FakerConsolePr
 
         static void Main(string[] args)
         {
-
-            //Faker.Create<IDto>();
-            Foo foo = Faker.Create<Foo>();
+            Foo foo = DataTransferObject.Faker.Create<Foo>();  
         }
     }
 }

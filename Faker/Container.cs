@@ -9,10 +9,99 @@ using static DataTransferObject.Container;
 
 namespace DataTransferObject
 {
+
+    internal class ReflectionParameter
+    {
+        private ParameterInfo _param;
+
+        public ReflectionParameter(ParameterInfo parameter)
+        {
+
+            this._param = parameter;
+        }
+
+        public Type getType()
+        {
+
+            return _param.ParameterType;
+        }
+    }
+
+    public delegate object ConstructorDecorator();
+
+    internal class ReflectionConstructor
+    {
+
+        private ConstructorInfo _ctor;
+        private List<ReflectionParameter> _ctorParams;
+
+        public ReflectionConstructor(ConstructorInfo ctor)
+        {
+            /*  Outside of closure for garbage collection reasons  */
+            this._ctor = ctor;
+            this._ctorParams = new();
+
+            ParameterInfo[] parameters = _ctor.GetParameters();
+            foreach (ParameterInfo parameter in parameters)
+            {
+                _ctorParams.Add(new(parameter));
+            }
+        }
+
+        public ReflectionParameter[] getParameters()
+        {
+          
+            return _ctorParams.ToArray();
+        }
+        public ConstructorDecorator Snapshot()
+        {
+            var constructor = this._ctor;
+            var parameters  = this.getParameters();
+
+            ConstructorDecorator closure = () =>
+            {
+                List<object> args = new();
+
+                foreach (ReflectionParameter parameter in parameters)
+                {
+                    //var intg = new Int32Generator();
+                    //if (typeof(IGenerator).IsAssignableFrom(intg.GetType())) {
+
+                    //    args.Add(intg.Generate());
+                    //}
+                }
+
+                return constructor.Invoke(args.ToArray());
+            };
+
+            return closure;
+        }
+    }
+
+    internal class ReflectionClass
+    {
+        private Type _classType;
+        private ReflectionConstructor _ctor;
+
+        public ReflectionClass(string className)
+        {
+
+            this._classType = Type.GetType(className)!;
+            ConstructorInfo[] ctors = this._classType.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            this._ctor = new ReflectionConstructor(ctors[0]);
+        }
+
+        public ReflectionConstructor getConstructor()
+        {
+            
+            return this._ctor;
+        }
+    }
+
     public class Container : IContainer
     {
 
-        private ConcurrentDictionary<string, cctor> objects = new();
+        private ConcurrentDictionary<string, ConstructorDecorator> services = new();
 
         public bool has(string id)
         {
@@ -21,7 +110,7 @@ namespace DataTransferObject
 
         public bool isset(string id)
         {
-            return objects.ContainsKey(id);
+            return services.ContainsKey(id);
         }
 
         private protected bool class_exists(string className)
@@ -33,97 +122,22 @@ namespace DataTransferObject
         {
             if (!this.has(id)) {
             
-                throw new NotFoundExceptionInterface("ti popusk");
+                throw new NotFoundException("Invalid object passed to get method.");
             }
             
-            return isset(id)
-              ? this.objects[id]()
-              : this.prepareObject(id);
-        }
-
-        public bool empty(object? o)
-        {
-            return o == null;
-        }
-
-
-        public delegate object cctor(object?[]? args);
-
-        internal class ReflectionConstructor
-        {
-            private ConstructorInfo ctor;
-            List<Type> ctorParams;
-            public ReflectionConstructor(ConstructorInfo ctor)
-            {
-                this.ctor = ctor;
-            }
-            public List<Type> getParameters()
-            {
-                ctorParams = new();
-                ParameterInfo[] parameters = ctor.GetParameters();
-                foreach (ParameterInfo parameter in parameters)
-                {
-                    ctorParams.Add(parameter.ParameterType);
-                }
-                return ctorParams;
-            }
-            public cctor Snapshot()
-            {
-                ConstructorInfo ctor = this.ctor;
-                cctor closure = (object?[]? args) =>
-                {
-                    return ctor.Invoke(args);
-                };
-
-                return closure;
-            }
-        }
-
-        internal class ReflectionClass
-        {
-            private Type T;
-            public ReflectionClass(Type t)
-            {
-                T = t;
-            }
-
-            public ReflectionConstructor? getConstructor()
-            {
-                ConstructorInfo[] ctors = T.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                return new ReflectionConstructor(ctors[0]);
-            }
+            return isset(id) ? this.services[id]()
+                             : this.prepareObject(id);
         }
 
         private object prepareObject(string id)
         {
-            Type @class = Type.GetType(id)!;
+            var classReflector = new ReflectionClass(id);
+            var constructorReflector = classReflector.getConstructor();
 
-            var classReflector = new ReflectionClass(@class);
+            var constructorDecorator = constructorReflector.Snapshot();
+            services.TryAdd(id, constructorDecorator);
 
-            var constructReflector = classReflector.getConstructor();
-
-            if (empty(constructReflector))
-            {
-                return Activator.CreateInstance(@class);
-            }
-
-            var constructArguments = constructReflector.getParameters();
-            if (empty(constructArguments))
-            {
-                return Activator.CreateInstance(@class);
-            }
-
-            List<object> args = new();
-            foreach (var argument in constructArguments) {
-
-                object arg = this.get(argument.Name);
-                args.Add(arg);
-            }
-
-            var ctorDecorator = constructReflector.Snapshot();
-            objects.TryAdd(id, ctorDecorator);
-
-            return ctorDecorator(args);
+            return constructorDecorator();
         }
 
     }

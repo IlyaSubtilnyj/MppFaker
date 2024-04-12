@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakerConsolePr", "FakerConsolePr.csproj", "{B02EDC51-4F71-47A2-BCE3-A04F817E393C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakerConsolePr", "FakerConsolePr.csproj", "{B02EDC51-4F71-47A2-BCE3-A04F817E393C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Faker", "..\Faker\Faker.csproj", "{881BE035-A307-4F23-B398-9C87B3A5015A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Faker", "..\Faker\Faker.csproj", "{881BE035-A307-4F23-B398-9C87B3A5015A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratorsPlugin", "..\GeneratorsPlugin\GeneratorsPlugin.csproj", "{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{881BE035-A307-4F23-B398-9C87B3A5015A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{881BE035-A307-4F23-B398-9C87B3A5015A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{881BE035-A307-4F23-B398-9C87B3A5015A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

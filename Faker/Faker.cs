@@ -17,6 +17,7 @@ namespace DataTransferObject
         /// </summary>
         static Faker()
         {
+            GeneratorConfig.Load("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
             container = new Container();
         }
 
