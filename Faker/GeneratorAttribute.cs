@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataTransferObject
 {
+    [AttributeUsage(validOn: AttributeTargets.Class)]
     public class GeneratorAttribute : Attribute
     {
         public Type GenereatorType

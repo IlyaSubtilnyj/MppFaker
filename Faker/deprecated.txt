@@ -1,0 +1,43 @@
+
+
+private ConcurrentDictionary<string, ConstructorDecorator> services = new();
+
+
+/*
+public object get(string id)
+{
+    if (!this.has(id)) {
+
+        throw new NotFoundException("Invalid object passed to get method.");
+    }
+
+    return isset(id) ? this.services[id]()
+                     : this.prepareObject(id);
+}
+
+
+private protected bool class_exists(string className)
+{
+    return Type.GetType(className) != null;
+}
+
+*/
+
+/*
+var constructorDecorator = constructorReflector.Snapshot();
+services.TryAdd(id, constructorDecorator);
+
+return constructorDecorator();
+*/
+
+/*
+ public bool has(string id)
+{
+    return isset(id) || class_exists(id);
+}
+
+public bool isset(string id)
+{
+    return services.ContainsKey(id);
+}
+ */

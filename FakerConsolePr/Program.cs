@@ -6,14 +6,13 @@ namespace FakerConsolePr
     {
 
         public int y;
+        public string x;
 
-        public Foo(int y) { 
+        //private Foo() { y = 25; }
+
+        public Foo(IEnumerable<int> x, int y) { 
             this.y = y;
         }
-
-        public Foo(string x) { }
-
-        public Foo() { }
 
     }
     internal class Program
@@ -26,7 +25,7 @@ namespace FakerConsolePr
 
         static void Main(string[] args)
         {
-            Foo foo = DataTransferObject.Faker.Create<Foo>();  
+            var foo = DataTransferObject.Faker.Create<Foo>();  
         }
     }
 }
