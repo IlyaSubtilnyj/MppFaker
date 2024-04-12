@@ -33,7 +33,7 @@ namespace DataTransferObject
         {
             if (!this.has(id)) {
             
-                throw new Exception("ti popusk");
+                throw new NotFoundExceptionInterface("ti popusk");
             }
             
             return isset(id)
