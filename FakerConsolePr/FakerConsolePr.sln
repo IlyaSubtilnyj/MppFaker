@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Faker", "..\Faker\Faker.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeneratorsPlugin", "..\GeneratorsPlugin\GeneratorsPlugin.csproj", "{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakerTests", "..\FakerTests\FakerTests.csproj", "{394D6904-E1D3-4F1C-97AF-4F3E67823C45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{394D6904-E1D3-4F1C-97AF-4F3E67823C45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{394D6904-E1D3-4F1C-97AF-4F3E67823C45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{394D6904-E1D3-4F1C-97AF-4F3E67823C45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{394D6904-E1D3-4F1C-97AF-4F3E67823C45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

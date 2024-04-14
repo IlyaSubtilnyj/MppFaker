@@ -66,7 +66,7 @@ namespace DataTransferObject
 
             private Type    _classMeta;
             private Type    _outTargetInstanceType;
-            private Type[]  _args;
+            private Type[]  _classMetaArgs;
             private Type    _specialization;
 
             private bool isTemplated(Type t)
@@ -81,7 +81,7 @@ namespace DataTransferObject
                 this._specialization = contender;
 
                 var outTargetInstanceType = _classMeta.GetInterface(DTOContract.Name)!.GetGenericArguments()[0];
-                this._args = outTargetInstanceType.GetGenericArguments();
+                this._classMetaArgs = outTargetInstanceType.GetGenericArguments();
 
                 if (isTemplated(outTargetInstanceType))
                     this._outTargetInstanceType = outTargetInstanceType.GetGenericTypeDefinition();      
@@ -100,7 +100,7 @@ namespace DataTransferObject
             public Type[] Args()
             {
 
-                return this._args;
+                return this._classMetaArgs;
             }
 
             public static int ArgIsCompatible(Type arg, Type targetArg)
@@ -149,16 +149,17 @@ namespace DataTransferObject
                 var classArgs = _classMeta.GetGenericArguments();
                 var interfaceArgs = this.Args();
 
-                List<Type> resultArgs = new List<Type>();
-
                 for(int i = 0; i < args.Length; i++)
                 {
 
                     if (interfaceArgs[i].FullName == null)
-                        resultArgs.Add(args[i]);
+                    {
+                        int index = Array.IndexOf(classArgs, interfaceArgs[i]);
+                        classArgs[index] = args[i];
+                    }
                 }
 
-                this._specialization = this._classMeta.MakeGenericType(resultArgs.ToArray());
+                this._specialization = this._classMeta.MakeGenericType(classArgs);
                 return this;
             }
 
@@ -188,6 +189,12 @@ namespace DataTransferObject
 
                 new FormulatorDecorator(pluginType);
             }
+        }
+
+        public static void Add(Type pluginType)
+        {
+
+            new FormulatorDecorator(pluginType);
         }
 
     }

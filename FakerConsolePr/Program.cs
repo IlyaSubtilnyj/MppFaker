@@ -48,6 +48,8 @@ namespace FakerConsolePr
         {
             Composer.Load("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
 
+            var inst = Composer.Compose(typeof(List<int>));
+
             var faker = new Faker();
             var foo = faker.Create<B>();
         }

@@ -32,7 +32,7 @@ namespace DataTransferObject
             return attribute is not null;
         }
 
-        public bool resolveDependency(Type id, ref object dependant, Type dep_id, out object dependency)
+        public bool ResolveDependency(Type id, ref object dependant, Type dep_id, out object dependency)
         {
             Encountered.Add(id, dependant);
 
@@ -66,7 +66,7 @@ namespace DataTransferObject
                     {
                        
                         object dependency;
-                        bool isRecursive = resolveDependency(id, ref result, parameter.ParameterType(), out dependency);
+                        bool isRecursive = ResolveDependency(id, ref result, parameter.ParameterType(), out dependency);
 
                         if (isRecursive)
                         {
@@ -99,7 +99,7 @@ namespace DataTransferObject
                     if (Has(field.FieldType()))
                     {
 
-                        bool isRecursive = resolveDependency(id, ref result, field.FieldType(), out generatedField);
+                        bool isRecursive = ResolveDependency(id, ref result, field.FieldType(), out generatedField);
 
                         if (isRecursive)
                         {
@@ -128,7 +128,7 @@ namespace DataTransferObject
                     if (Has(property.PropertyType()))
                     {
 
-                        bool isRecursive = resolveDependency(id, ref result, property.PropertyType(), out generatedProperty);
+                        bool isRecursive = ResolveDependency(id, ref result, property.PropertyType(), out generatedProperty);
 
                         if (isRecursive)
                         {

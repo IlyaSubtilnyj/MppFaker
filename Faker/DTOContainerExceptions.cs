@@ -5,7 +5,7 @@ using System.Web;
 namespace DataTransferObject
 {
 
-    class DTOContainerException : Exception
+    public class DTOContainerException : Exception
     {
         public DTOContainerException() : base()
         { }
@@ -17,7 +17,7 @@ namespace DataTransferObject
         { }
     }
 
-    class NotFoundException : DTOContainerException
+    public class NotFoundException : DTOContainerException
     {
         public NotFoundException() : base()
         { }
@@ -29,7 +29,7 @@ namespace DataTransferObject
         { }
     }
 
-    class UnresolvableRecursionException : DTOContainerException
+    public class UnresolvableRecursionException : DTOContainerException
     {
         public UnresolvableRecursionException() : base()
         { }
