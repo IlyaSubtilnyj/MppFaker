@@ -22,4 +22,22 @@ namespace GeneratorsPlugin
         }
     }
 
+    public class DiccFormulatorr<T> : IFormulator<Dictionary<T, int>> where T : notnull
+    {
+        public Dictionary<T, int> Generate()
+        {
+            return new();
+        }
+    }
+
+    public class DicFormulatorr<T> : IFormulator<Dictionary<int, T>>
+    {
+        public Dictionary<int, T> Generate()
+        {
+            return new();
+        }
+    }
+
+
+
 }

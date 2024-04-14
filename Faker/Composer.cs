@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace DataTransferObject
 {
-    static class Composer
+    public static class Composer
     {
 
         private static Dictionary<Type, Type> keyValuePairs = new();
         private static Dictionary<Type, List<Type>> genericKeyValuePairs = new();
 
-        static Composer()
+        public static void load(string path)
         {
-            Assembly pluginAssembly = Assembly.LoadFrom("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
+            Assembly pluginAssembly = Assembly.LoadFrom(path);
 
             var contructType = typeof(IFormulator<>);
             Type[] pluginTypes = pluginAssembly.GetTypes().Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == contructType)).ToArray();
@@ -56,6 +56,18 @@ namespace DataTransferObject
             if (t1.FullName == null) { comp = 1; }
             else if (t1 == t2) { comp = 2; }
             else comp = 0;
+        }
+
+        public static bool isFullCompatible(Type[] types, Type[] template)
+        {
+            int result = 2;
+            for(int i = 0; i < template.Length; i++)
+            {
+                isCompatible(types[i], template[i], out result);
+                if (result == 0)
+                    return false;
+            }
+            return true;
         }
 
         public static bool isMoreCompatible(Type[] types1, Type[] types2, Type[] template)
@@ -103,7 +115,10 @@ namespace DataTransferObject
                         else return acc;
                     });
 
-                    var genericType = mostCompatibleFormulator.MakeGenericType(formerGenericDefinitionArguments);
+                    //if (!isFullCompatible(mostCompatibleFormulator.GetInterface(typeof(IFormulator<>).Name).GetGenericArguments()[0].GetGenericArguments(), target.GetGenericArguments()))
+                    //    return default;
+
+                    var genericType = mostCompatibleFormulator.MakeGenericType(formerGenericDefinitionArguments[0]);
                     var generic = Activator.CreateInstance(genericType);
                     MethodInfo method = genericType.GetMethod("Generate");
                     return method.Invoke(generic, null);

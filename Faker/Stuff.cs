@@ -45,4 +45,22 @@ namespace DataTransferObject
         }
     }
 
+    class UnresolvableRecursionException : ContainerException
+    {
+        public UnresolvableRecursionException() : base()
+        {
+            // Дополнительная логика инициализации
+        }
+
+        public UnresolvableRecursionException(string message) : base(message)
+        {
+            // Дополнительная логика инициализации
+        }
+
+        public UnresolvableRecursionException(string message, Exception innerException) : base(message, innerException)
+        {
+            // Дополнительная логика инициализации
+        }
+    }
+
 }

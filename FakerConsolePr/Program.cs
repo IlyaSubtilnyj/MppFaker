@@ -14,6 +14,10 @@ namespace FakerConsolePr
         public int x = 0;
         public int z { get; set; }
 
+        public Foo f;
+
+        public Foo foo1 { get; set; }
+
         private Foo(int x) { y = 25; this.x = x; }
 
         public Foo(Foo foo) { 
@@ -29,6 +33,7 @@ namespace FakerConsolePr
     class Test
     {
         public int y;
+        public Test(int y) { this.y = y; }
     }
 
     [Dto]
@@ -47,18 +52,28 @@ namespace FakerConsolePr
     class B {
 
         public int x = 3;
+
+        public A a { get; set; }
+        public C c { get; set; }
+    }
+
+    [Dto]
+    class C
+    {
+
         public A a { get; set; }
     }
 
+   
     internal class Program
     {
 
         static void Main(string[] args)
         {
+            Composer.load("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
 
-
-            //var lol2 = Composer.Formulate(typeof(List<List<int>>));
-            var foo = DataTransferObject.Faker.Create<A>();
+            //var foo = DataTransferObject.Faker.Create<Foo>();
+            var lol2 = Composer.Formulate(typeof(Dictionary<int, int>));
 
         }
     }

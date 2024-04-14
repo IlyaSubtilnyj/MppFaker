@@ -16,6 +16,8 @@ namespace DataTransferObject
     public class Container : IContainer
     {
 
+        private ConcurrentDictionary<Type, object> objects = new();
+
         public bool has(Type id)
         {
             return isDto(id);
@@ -34,11 +36,28 @@ namespace DataTransferObject
             {
                 throw new NotFoundException("Invalid object passed to get method.");
             }
+
             return this.prepareObject(id);
+        }
+
+        public bool isset(Type id)
+        {
+            return objects.ContainsKey(id);
+        }
+
+        public bool resolveDependency(Type id, ref object dependant, Type did, out object dependency)
+        {
+            this.objects[id] = dependant;
+
+            bool is_set = isset(did);
+            dependency = is_set ? this.objects[did] : this.prepareObject(did);
+
+            return is_set;
         }
 
         private object prepareObject(Type id)
         {
+            
             object result = new();
 
             var classReflector = new ReflectionClass(id);
@@ -58,7 +77,14 @@ namespace DataTransferObject
                     if (has(parameter.ParameterType()))
                     {
                        
-                        object dependency = prepareObject(parameter.ParameterType());
+                        object dependency;
+                        bool isRecursive = resolveDependency(id, ref result, parameter.ParameterType(), out dependency);
+
+                        if (isRecursive)
+                        {
+                            throw new UnresolvableRecursionException("Recursive DTO dependencies not allowed in DTO constructor");
+                        }
+
                         args.Add(dependency);
                     }
                     else
@@ -82,8 +108,18 @@ namespace DataTransferObject
                 foreach (ReflectionField field in classPublicFields)
                 {
 
-                    //check on recursion
-                    var generatedField = Composer.Formulate(field.FieldType());
+                    object? generatedField = null;
+
+                    if (has(field.FieldType()))
+                    {
+
+                        resolveDependency(id, ref result, field.FieldType(), out generatedField);
+                    }
+                    else
+                    {
+                        generatedField = Composer.Formulate(field.FieldType());
+                    }
+
                     field.SetValue(result, generatedField);
                 }
             }
@@ -100,7 +136,8 @@ namespace DataTransferObject
 
                     if (has(property.PropertyType()))
                     {
-                        generatedProperty = prepareObject(property.PropertyType()); 
+
+                        resolveDependency(id, ref result, property.PropertyType(), out generatedProperty); 
                     }
                     else
                     {

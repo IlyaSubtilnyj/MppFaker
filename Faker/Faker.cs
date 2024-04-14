@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataTransferObject
 {
-    public sealed class Faker
+    public class Faker
     {
 
         private static Container container;
@@ -17,7 +17,8 @@ namespace DataTransferObject
         /// </summary>
         static Faker()
         {
-           container = new();
+            Composer.load("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
+            container = new();
         }
 
         public static T Create<T>()
