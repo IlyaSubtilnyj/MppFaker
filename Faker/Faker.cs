@@ -10,15 +10,7 @@ namespace DataTransferObject
     public class Faker
     {
 
-        private static Container container;
-
-        /// <summary>
-        /// Каждый Faker пользуется общим DTO resolving контейнером.
-        /// </summary>
-        static Faker()
-        {
-            container = new();
-        }
+        private DTOContainer _container = new();
 
         public T Create<T>()
         {
@@ -26,9 +18,9 @@ namespace DataTransferObject
             T? result = default;
             Type type = typeof(T);
 
-            if (container.Has(type))
+            if (_container.Has(type))
             {
-                result = (T)container.Get(type);
+                result = (T)_container.Get(type);
             }         
 
             return result;

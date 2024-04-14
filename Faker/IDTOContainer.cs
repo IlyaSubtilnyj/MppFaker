@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataTransferObject
 {
-    interface IContainer
+    internal interface IDTOContainer
     {
         /**
          * Finds an entry of the container by its identifier and returns it.

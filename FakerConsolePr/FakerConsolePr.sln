@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakerConsolePr", "FakerCons
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Faker", "..\Faker\Faker.csproj", "{881BE035-A307-4F23-B398-9C87B3A5015A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratorsPlugin", "..\GeneratorsPlugin\GeneratorsPlugin.csproj", "{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeneratorsPlugin", "..\GeneratorsPlugin\GeneratorsPlugin.csproj", "{6B8D817E-352E-4DC2-B9E0-16EF70A5E3D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

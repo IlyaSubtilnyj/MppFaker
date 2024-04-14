@@ -1,33 +1,18 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using static DataTransferObject.Container;
 
 namespace DataTransferObject
 {
 
-    public class Container : IContainer
+    internal class DTOContainer : IDTOContainer
     {
 
-        private ConcurrentDictionary<Type, object> objects = new();
+        private ConcurrentDictionary<int, Dictionary<Type, object>> recursivelyEncounteredObjects = new();
+        private Dictionary<Type, object> Encountered => recursivelyEncounteredObjects.GetOrAdd(Thread.CurrentThread.ManagedThreadId, _ => new());
 
         public bool Has(Type id)
         {
-            return isDto(id);
-        }
-
-        public bool isDto(Type id)
-        {
-
-            Attribute? attribute = id.GetCustomAttribute(typeof(DtoAttribute));
-            return attribute is not null;
+            return IsDto(id);
         }
 
         public object Get(Type id)
@@ -40,18 +25,21 @@ namespace DataTransferObject
             return this.prepareObject(id);
         }
 
-        public bool isset(Type id)
+        private bool IsDto(Type id)
         {
-            return objects.ContainsKey(id);
+
+            Attribute? attribute = id.GetCustomAttribute(typeof(DtoAttribute));
+            return attribute is not null;
         }
 
-        public bool resolveDependency(Type id, ref object dependant, Type did, out object dependency)
+        public bool resolveDependency(Type id, ref object dependant, Type dep_id, out object dependency)
         {
-            this.objects[id] = dependant;
+            Encountered.Add(id, dependant);
 
-            bool is_set = isset(did);
-            dependency = is_set ? this.objects[did] : this.prepareObject(did);
+            bool is_set = Encountered.ContainsKey(dep_id);
+            dependency = is_set ? Encountered[dep_id] : this.prepareObject(dep_id);
 
+            Encountered.Remove(id, out var temp);
             return is_set;
         }
 

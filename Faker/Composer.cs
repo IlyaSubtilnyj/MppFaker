@@ -10,24 +10,20 @@ using System.Threading.Tasks;
 
 namespace DataTransferObject
 {
-    using static DataTransferObject.Composer;
     using Target = Type;
 
     public static class Composer
     {
 
-        private static Dictionary<Type, Type> keyValuePairs = new();
-        private static Dictionary<Type, List<Type>> genericKeyValuePairs = new();
+        private static Dictionary<Type, List<FormulatorDecorator>> ComposersMap = new();
 
-        private static Dictionary<Type, List<Formulator>> ComposersMap = new();
-
-        public static void Remember(Type outputTarget, Formulator formulator)
+        public static void Remember(Type outputTarget, FormulatorDecorator formulator)
         {
 
-            List<Formulator>? targetQueue = null;
+            List<FormulatorDecorator>? targetQueue = null;
             if (ComposersMap.TryGetValue(outputTarget, out targetQueue))
                 targetQueue.Add(formulator);
-            else ComposersMap.Add(outputTarget, new List<Formulator>{ formulator });
+            else ComposersMap.Add(outputTarget, new List<FormulatorDecorator>{ formulator });
         }
 
         public static object Compose(Target target)
@@ -41,15 +37,15 @@ namespace DataTransferObject
                 if (ComposersMap.TryGetValue(targetDef, out composers))
                 {
 
-                    var mostCompatibleFormulator = composers.Aggregate(composers[0], delegate (Formulator mostCompatible, Formulator current)
+                    var mostCompatibleFormulator = composers.Aggregate(composers[0], delegate (FormulatorDecorator mostCompatible, FormulatorDecorator current)
                     {
 
-                        if (Formulator.MoreCompatible(current, mostCompatible, target))
+                        if (FormulatorDecorator.MoreCompatible(current, mostCompatible, target))
                             return current;
                         else return mostCompatible;
                     });
 
-                    if (Formulator.IsCompatible(mostCompatibleFormulator, target))
+                    if (FormulatorDecorator.IsCompatible(mostCompatibleFormulator, target))
                     {
 
                         return mostCompatibleFormulator.Specialize(target).Formulate();
@@ -64,21 +60,21 @@ namespace DataTransferObject
             return default;
         }
 
-        public class Formulator
+        public class FormulatorDecorator
         {
             private static Type DTOContract = typeof(IFormulator<>);
 
-            private Type _classMeta;
-            private Type _outTargetInstanceType;
-            private Type[] _args;
-            private Type _specialization;
+            private Type    _classMeta;
+            private Type    _outTargetInstanceType;
+            private Type[]  _args;
+            private Type    _specialization;
 
             private bool isTemplated(Type t)
             {
                 return t.FullName == null;
             }
 
-            public Formulator(Type contender)
+            public FormulatorDecorator(Type contender)
             {
 
                 this._classMeta = contender;
@@ -114,7 +110,7 @@ namespace DataTransferObject
                 else return 0;
             }
 
-            public static bool MoreCompatible(Formulator f1, Formulator f2, Target target)
+            public static bool MoreCompatible(FormulatorDecorator f1, FormulatorDecorator f2, Target target)
             {
                 var arguments = target.GetGenericArguments();
                 var f1Args = f1.Args();
@@ -131,7 +127,7 @@ namespace DataTransferObject
                 return false;
             }
 
-            public static bool IsCompatible(Formulator formulator, Target target)
+            public static bool IsCompatible(FormulatorDecorator formulator, Target target)
             {
                 var arguments = target.GetGenericArguments();
                 var formulatorArgs = formulator.Args();
@@ -146,7 +142,7 @@ namespace DataTransferObject
                 return true;
             }
 
-            public Formulator Specialize(Target target)
+            public FormulatorDecorator Specialize(Target target)
             {
        
                 var args = target.GetGenericArguments();
@@ -186,11 +182,11 @@ namespace DataTransferObject
         {
 
             Assembly pluginAssembly = Assembly.LoadFrom(path);           
-            Type[] pluginTypes = pluginAssembly.GetTypes().Where(t => Formulator.isFullfillContract(t)).ToArray();
+            Type[] pluginTypes = pluginAssembly.GetTypes().Where(t => FormulatorDecorator.isFullfillContract(t)).ToArray();
             foreach (var pluginType in pluginTypes)
             {
 
-                new Formulator(pluginType);
+                new FormulatorDecorator(pluginType);
             }
         }
 

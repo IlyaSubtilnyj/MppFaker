@@ -12,11 +12,13 @@ namespace GeneratorsPlugin
 {
     public class IEnurableFormulator<T> : IFormulator<IEnumerable<T>>
     {
+        private Faker _faker = new Faker();
 
         public IEnumerable<T> Generate()
         {
+
             while (true)
-                yield return Faker.Create<T>();
+                yield return _faker.Create<T>();
         }
 
     }
