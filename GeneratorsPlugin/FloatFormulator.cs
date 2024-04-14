@@ -7,17 +7,16 @@ using System.Threading.Tasks;
 
 namespace GeneratorsPlugin
 {
-    [Generator(typeof(float))]
-    public class FloatGenerator : IGenerator
+    public class FloatFormulator : IFormulator<float>
     {
         public const double LowerBound = 0.0;
 
         public const double UpperBound = 10.0;
 
         private readonly Random _random = new();
-        public object Generate()
+        public float Generate()
         {
-            return _random.NextSingle() * (UpperBound - LowerBound) + LowerBound;
+            return (float)(_random.NextSingle() * (UpperBound - LowerBound) + LowerBound);
         }
     }
 }

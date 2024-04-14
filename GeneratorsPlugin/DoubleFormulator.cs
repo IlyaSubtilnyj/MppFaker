@@ -7,15 +7,14 @@ using System.Threading.Tasks;
 
 namespace GeneratorsPlugin
 {
-    [Generator(typeof(double))]
-    public class DoubleGenerator : IGenerator
+    public class DoubleFormulator : IFormulator<double>
     {
         public const double LowerBound = 0.0;
 
         public const double UpperBound = 10.0;
 
         private readonly Random _random = new();
-        public object Generate()
+        public double Generate()
         {
             return _random.NextDouble() * (UpperBound - LowerBound) + LowerBound;
         }

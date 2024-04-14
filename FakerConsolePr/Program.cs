@@ -1,31 +1,65 @@
 ﻿using DataTransferObject;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.ObjectiveC;
+using System.Security.AccessControl;
 
 namespace FakerConsolePr
 {
-    public class Foo : IDto
+    [Dto]
+    public class Foo
     {
 
         public int y;
-        public string x;
+        public int x = 0;
+        public int z { get; set; }
 
-        //private Foo() { y = 25; }
+        private Foo(int x) { y = 25; this.x = x; }
+
+        public Foo(Foo foo) { 
+            x = foo.x + 1;
+        }
 
         public Foo(IEnumerable<int> x, int y) { 
             this.y = y;
         }
 
     }
+
+    class Test
+    {
+        public int y;
+    }
+
+    [Dto]
+    class A
+    {
+        private int x = 0;
+
+        public B b { 
+            set {
+                x += value.x;
+            } 
+        }
+    }
+
+    [Dto]
+    class B {
+
+        public int x = 3;
+        public A a { get; set; }
+    }
+
     internal class Program
     {
 
-        class Test
-        {
-            public int y;
-        }
-
         static void Main(string[] args)
         {
-            var foo = DataTransferObject.Faker.Create<Foo>();  
+
+
+            //var lol2 = Composer.Formulate(typeof(List<List<int>>));
+            var foo = DataTransferObject.Faker.Create<A>();
+
         }
     }
 }

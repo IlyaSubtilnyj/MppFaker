@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace GeneratorsPlugin
 {
-    [Generator(typeof(string))]
-    public class StringGenerator : IGenerator
+    public class StringFormulator : IFormulator<string>
     {
-        public object Generate()
+        public string Generate()
         {
             return DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss").Replace(" ", String.Empty);
         }

@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace GeneratorsPlugin
 {
-    [Generator(typeof(Uri))]
-    public class UriGenerator : IGenerator
+    public class UriFormulator : IFormulator<Uri>
     {
-        StringGenerator stringGenerator = new();
-        public object Generate()
+        StringFormulator stringGenerator = new();
+        public Uri Generate()
         {
             var path = stringGenerator.Generate();
             UriBuilder uriBuilder = new UriBuilder("https", "example.com", 8080, $"/{path}", "extra");

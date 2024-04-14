@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DataTransferObject
 {
-
-    public interface IGenerator
+    [AttributeUsage(validOn: AttributeTargets.Class)]
+    public class DtoAttribute : Attribute
     {
-        object Generate();
+        public DtoAttribute()
+        { }
     }
-
 }

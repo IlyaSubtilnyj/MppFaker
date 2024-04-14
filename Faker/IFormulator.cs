@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace DataTransferObject
 {
-
-    public interface IGenerator
+    public interface IFormulator<out T>
     {
-        object Generate();
+        T Generate();
     }
-
 }

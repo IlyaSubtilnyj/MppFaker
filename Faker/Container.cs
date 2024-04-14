@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using static DataTransferObject.Container;
@@ -14,19 +16,19 @@ namespace DataTransferObject
     public class Container : IContainer
     {
 
-        private Dictionary<Type, IGenerator> _map;
-
-        public Container(Dictionary<Type, IGenerator> d)
+        public bool has(Type id)
         {
-            _map = d;
+            return isDto(id);
         }
 
-        public bool has(string id)
+        public bool isDto(Type id)
         {
-            return Type.GetType(id) != null;
+
+            Attribute? attribute = id.GetCustomAttribute(typeof(DtoAttribute));
+            return attribute is not null;
         }
 
-        public object get(string id)
+        public object get(Type id)
         {
             if (!this.has(id))
             {
@@ -35,42 +37,81 @@ namespace DataTransferObject
             return this.prepareObject(id);
         }
 
-        private object prepareObject(string id)
+        private object prepareObject(Type id)
         {
+            object result = new();
+
             var classReflector = new ReflectionClass(id);
             var constructorReflector = classReflector.getConstructor();
+            var constructorParams = constructorReflector?.getParameters();
 
-            if (constructorReflector == null)
+            if (constructorReflector == null || constructorParams == null)
             {
-                return ReflectionConstructor.ExtConstructor(classReflector.ClassType());
-            }
 
-            var constructorParams = constructorReflector.getParameters();
-
-            if (constructorParams == null)
+                result =  ReflectionConstructor.ExtConstructor(classReflector.ClassType());
+            } else
             {
-                return ReflectionConstructor.ExtConstructor(classReflector.ClassType());
-            }
 
-            List<object> args = new();
-            foreach (ReflectionParameter parameter in constructorParams)
-            {
-                
-                IGenerator generator;
-                var name = parameter.ParameterType().Namespace + "." + parameter.ParameterType().Name;
-
-
-                if (this._map.TryGetValue(parameter.ParameterType(), out generator))
+                List<object> args = new();
+                foreach (ReflectionParameter parameter in constructorParams)
                 {
-                    args.Add(generator.Generate());
-                } else
-                {
-                    args.Add(Activator.CreateInstance(parameter.ParameterType())!);
+                    if (has(parameter.ParameterType()))
+                    {
+                       
+                        object dependency = prepareObject(parameter.ParameterType());
+                        args.Add(dependency);
+                    }
+                    else
+                    {
+                        var generatedParamenter = Composer.Formulate(parameter.ParameterType());
+                        args.Add(generatedParamenter);
+                    }
+                    //если дто, то сгенерить dto рекурсивно
+                    //буффер, чтобы предотвратить рекурсивность (isset)
+
                 }
 
+                result = constructorReflector.Execute(args.ToArray());
             }
 
-            return constructorReflector.Execute(args.ToArray());
+            var classPublicFields = classReflector.getPublicFields();
+
+            if (classPublicFields != null)
+            {
+
+                foreach (ReflectionField field in classPublicFields)
+                {
+
+                    //check on recursion
+                    var generatedField = Composer.Formulate(field.FieldType());
+                    field.SetValue(result, generatedField);
+                }
+            }
+
+            var classPublicProperties = classReflector.getPublicProperties();
+
+            if (classPublicProperties != null)
+            {
+
+                foreach (ReflectionProperty property in classPublicProperties)
+                {
+
+                    object? generatedProperty = null;
+
+                    if (has(property.PropertyType()))
+                    {
+                        generatedProperty = prepareObject(property.PropertyType()); 
+                    }
+                    else
+                    {
+                        generatedProperty = Composer.Formulate(property.PropertyType());
+                    }    
+                    
+                    property.SetValue(result, generatedProperty);
+                }
+            }
+
+            return result;
         }
 
     }

@@ -18,7 +18,7 @@ namespace DataTransferObject
          *
          * @return mixed Entry.
          */
-        public object get(string id);
+        public object get(Type id);
 
         /**
          * Returns true if the container can return an entry for the given identifier.
@@ -31,6 +31,6 @@ namespace DataTransferObject
          *
          * @return bool
          */
-        public bool has(string id);
+        public bool has(Type id);
     }
 }

@@ -17,22 +17,21 @@ namespace DataTransferObject
         /// </summary>
         static Faker()
         {
-            var dict = GeneratorConfig.Load("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
-            container = new Container(dict);
+           container = new();
         }
 
         public static T Create<T>()
         {
 
-            T? result = default(T);
+            T? result = default;
+            Type type = typeof(T);
 
-            var className = typeof(T).AssemblyQualifiedName!;
-            if (container.has(className))
+            if (container.has(type))
             {
-                result = (T)container.get(className);
+                result = (T)container.get(type);
             }         
 
-            return result!;
+            return result;
         }
     }
 }

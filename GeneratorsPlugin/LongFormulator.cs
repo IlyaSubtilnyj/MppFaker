@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace GeneratorsPlugin
 {
-    [Generator(typeof(long))]
-    class LongGenerator : IGenerator
+    class LongFormulator : IFormulator<long>
     {
         private readonly Random _random = new();
 
-        public object Generate()
+        public long Generate()
         {
             return _random.Next((int)DateTime.MinValue.Ticks, Int32.MaxValue);
         }
