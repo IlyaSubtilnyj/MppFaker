@@ -21,18 +21,22 @@ namespace GeneratorsPlugin
             return l;
         }
     }
-
-    public class DiccFormulatorr<T> : IFormulator<Dictionary<T, int>> where T : notnull
+    public class LisFormulator : IFormulator<List<int>>
     {
-        public Dictionary<T, int> Generate()
+        public List<int> Generate()
         {
-            return new();
+            List<int> l = new List<int>();
+            for (int i = 1; i < 5 + 1; i++)
+            {
+                l.Add(DataTransferObject.Faker.Create<int>());
+            }
+            return l;
         }
     }
 
-    public class DicFormulatorr<T> : IFormulator<Dictionary<int, T>>
+    public class DicFormulatorr<U, T> : IFormulator<Dictionary<T, U>>
     {
-        public Dictionary<int, T> Generate()
+        public Dictionary<T, U> Generate()
         {
             return new();
         }

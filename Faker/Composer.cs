@@ -2,137 +2,197 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DataTransferObject
 {
+    using static DataTransferObject.Composer;
+    using Target = Type;
+
     public static class Composer
     {
 
         private static Dictionary<Type, Type> keyValuePairs = new();
         private static Dictionary<Type, List<Type>> genericKeyValuePairs = new();
 
-        public static void load(string path)
+        private static Dictionary<Type, List<Formulator>> ComposersMap = new();
+
+        public static void Remember(Type outputTarget, Formulator formulator)
         {
-            Assembly pluginAssembly = Assembly.LoadFrom(path);
 
-            var contructType = typeof(IFormulator<>);
-            Type[] pluginTypes = pluginAssembly.GetTypes().Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == contructType)).ToArray();
+            List<Formulator>? targetQueue = null;
+            if (ComposersMap.TryGetValue(outputTarget, out targetQueue))
+                targetQueue.Add(formulator);
+            else ComposersMap.Add(outputTarget, new List<Formulator>{ formulator });
+        }
 
-            foreach (var pluginType in pluginTypes)
+        public static object Compose(Target target)
+        {
+
+            if (!ComposersMap.TryGetValue(target, out var composers))
             {
 
-                var target = pluginType.GetInterface(contructType.Name)!.GetGenericArguments()[0];
+                var targetDef = target.GetGenericTypeDefinition();
 
-                if (target.FullName == null)
+                if (ComposersMap.TryGetValue(targetDef, out composers))
                 {
-                    Type genericDefinition = target.GetGenericTypeDefinition();
-                    List<Type>? queue = null;
-                    genericKeyValuePairs.TryGetValue(genericDefinition, out queue);
-                    if (queue == null)
+
+                    var mostCompatibleFormulator = composers.Aggregate(composers[0], delegate (Formulator mostCompatible, Formulator current)
                     {
-                        genericKeyValuePairs.Add(genericDefinition, new List<Type> { pluginType });
-                    }
-                    else
-                    {
-                        queue.Add(pluginType);
-                    }
-                }
-                else
-                {
-                    Type? pluginTypep = null;
-                    keyValuePairs.TryGetValue(target, out pluginTypep);
-                    if (pluginTypep == null)
-                        keyValuePairs.Add(target, pluginType);
-                }
 
-            }
-        }
-
-        public static void isCompatible(Type t1, Type t2, out int comp)
-        {
-            if (t1.FullName == null) { comp = 1; }
-            else if (t1 == t2) { comp = 2; }
-            else comp = 0;
-        }
-
-        public static bool isFullCompatible(Type[] types, Type[] template)
-        {
-            int result = 2;
-            for(int i = 0; i < template.Length; i++)
-            {
-                isCompatible(types[i], template[i], out result);
-                if (result == 0)
-                    return false;
-            }
-            return true;
-        }
-
-        public static bool isMoreCompatible(Type[] types1, Type[] types2, Type[] template)
-        {
-            var length = template.Length;
-            for (var i = 0; i < length; i++)
-            {
-                int t1Comp;
-                int t2Comp;
-                isCompatible(types1[i], template[i], out t1Comp);
-                isCompatible(types2[i], template[i], out t2Comp);
-
-                if (t1Comp > t2Comp) return true;
-                else if (t1Comp < t2Comp) return false;
-            }
-            return false;
-
-        }
-
-        public static object Formulate(Type target)
-        {
-        
-            Type? isNotTemplated = null;
-            keyValuePairs.TryGetValue(target, out isNotTemplated);
-
-            if (isNotTemplated == null)
-            {
-
-                if (!target.IsGenericType) { return default; }
-
-                var formerGenericDefinition = target.GetGenericTypeDefinition();
-                var formerGenericDefinitionArguments = target.GetGenericArguments();
-
-                List<Type>? genericQueue = null;
-                if (genericKeyValuePairs.TryGetValue(formerGenericDefinition, out genericQueue))
-                {
-                    var mostCompatibleFormulator = genericQueue.Aggregate(genericQueue.FirstOrDefault()!, delegate (Type acc, Type current)
-                    {
-                        var curArgs = current.GetInterface(typeof(IFormulator<>).Name).GetGenericArguments()[0].GetGenericArguments();
-                        var accArgs = acc.GetInterface(typeof(IFormulator<>).Name).GetGenericArguments()[0].GetGenericArguments();
-                        var tArgs = target.GetGenericArguments();
-
-                        if (isMoreCompatible(curArgs, accArgs, tArgs))
+                        if (Formulator.MoreCompatible(current, mostCompatible, target))
                             return current;
-                        else return acc;
+                        else return mostCompatible;
                     });
 
-                    //if (!isFullCompatible(mostCompatibleFormulator.GetInterface(typeof(IFormulator<>).Name).GetGenericArguments()[0].GetGenericArguments(), target.GetGenericArguments()))
-                    //    return default;
+                    if (Formulator.IsCompatible(mostCompatibleFormulator, target))
+                    {
 
-                    var genericType = mostCompatibleFormulator.MakeGenericType(formerGenericDefinitionArguments[0]);
-                    var generic = Activator.CreateInstance(genericType);
-                    MethodInfo method = genericType.GetMethod("Generate");
-                    return method.Invoke(generic, null);
+                        return mostCompatibleFormulator.Specialize(target).Formulate();
+                    }                         
                 }
-
             }
             else
             {
-                var generic = Activator.CreateInstance(isNotTemplated);
-                MethodInfo method = isNotTemplated.GetMethod("Generate");
-                return method.Invoke(generic, null);
+                return composers[0].Formulate();
             }
 
             return default;
         }
+
+        public class Formulator
+        {
+            private static Type DTOContract = typeof(IFormulator<>);
+
+            private Type _classMeta;
+            private Type _outTargetInstanceType;
+            private Type[] _args;
+            private Type _specialization;
+
+            private bool isTemplated(Type t)
+            {
+                return t.FullName == null;
+            }
+
+            public Formulator(Type contender)
+            {
+
+                this._classMeta = contender;
+                this._specialization = contender;
+
+                var outTargetInstanceType = _classMeta.GetInterface(DTOContract.Name)!.GetGenericArguments()[0];
+                this._args = outTargetInstanceType.GetGenericArguments();
+
+                if (isTemplated(outTargetInstanceType))
+                    this._outTargetInstanceType = outTargetInstanceType.GetGenericTypeDefinition();      
+                else
+                    this._outTargetInstanceType = outTargetInstanceType;
+
+                Composer.Remember(this._outTargetInstanceType, this);
+            }
+
+            public Target Target()
+            {
+
+                return this._outTargetInstanceType;
+            }
+
+            public Type[] Args()
+            {
+
+                return this._args;
+            }
+
+            public static int ArgIsCompatible(Type arg, Type targetArg)
+            {
+                if (arg.FullName == null) { return 1; }
+                else if (arg == targetArg) { return 2; }
+                else return 0;
+            }
+
+            public static bool MoreCompatible(Formulator f1, Formulator f2, Target target)
+            {
+                var arguments = target.GetGenericArguments();
+                var f1Args = f1.Args();
+                var f2Args = f2.Args();
+
+                for (var i = 0; i < arguments.Length; i++)
+                {
+                    var f1Compatability = ArgIsCompatible(f1Args[i], arguments[i]);
+                    var f2Compatability = ArgIsCompatible(f2Args[i], arguments[i]);
+
+                    if (f1Compatability > f2Compatability) return true;
+                    else if (f1Compatability < f2Compatability) return false;
+                }
+                return false;
+            }
+
+            public static bool IsCompatible(Formulator formulator, Target target)
+            {
+                var arguments = target.GetGenericArguments();
+                var formulatorArgs = formulator.Args();
+
+                for (var i = 0; i < arguments.Length; i++)
+                {
+
+                    var compatability = ArgIsCompatible(formulatorArgs[i], arguments[i]);
+                    if (compatability == 0) return false;
+                }
+
+                return true;
+            }
+
+            public Formulator Specialize(Target target)
+            {
+       
+                var args = target.GetGenericArguments();
+                var classArgs = _classMeta.GetGenericArguments();
+                var interfaceArgs = this.Args();
+
+                List<Type> resultArgs = new List<Type>();
+
+                for(int i = 0; i < args.Length; i++)
+                {
+
+                    if (interfaceArgs[i].FullName == null)
+                        resultArgs.Add(args[i]);
+                }
+
+                this._specialization = this._classMeta.MakeGenericType(resultArgs.ToArray());
+                return this;
+            }
+
+            public object Formulate()
+            {
+
+                var specInstance = Activator.CreateInstance(this._specialization);
+                var generationMethod = this._specialization.GetMethod("Generate");
+                return generationMethod.Invoke(specInstance, null)!;
+            }
+
+            public static bool isFullfillContract(Type t)
+            {
+
+                return t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == DTOContract);
+            }
+
+        }
+
+        public static void Load(string path)
+        {
+
+            Assembly pluginAssembly = Assembly.LoadFrom(path);           
+            Type[] pluginTypes = pluginAssembly.GetTypes().Where(t => Formulator.isFullfillContract(t)).ToArray();
+            foreach (var pluginType in pluginTypes)
+            {
+
+                new Formulator(pluginType);
+            }
+        }
+
     }
 }

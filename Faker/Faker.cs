@@ -17,19 +17,18 @@ namespace DataTransferObject
         /// </summary>
         static Faker()
         {
-            Composer.load("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
             container = new();
         }
 
-        public static T Create<T>()
+        public T Create<T>()
         {
 
             T? result = default;
             Type type = typeof(T);
 
-            if (container.has(type))
+            if (container.Has(type))
             {
-                result = (T)container.get(type);
+                result = (T)container.Get(type);
             }         
 
             return result;

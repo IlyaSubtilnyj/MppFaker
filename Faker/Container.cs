@@ -18,7 +18,7 @@ namespace DataTransferObject
 
         private ConcurrentDictionary<Type, object> objects = new();
 
-        public bool has(Type id)
+        public bool Has(Type id)
         {
             return isDto(id);
         }
@@ -30,9 +30,9 @@ namespace DataTransferObject
             return attribute is not null;
         }
 
-        public object get(Type id)
+        public object Get(Type id)
         {
-            if (!this.has(id))
+            if (!this.Has(id))
             {
                 throw new NotFoundException("Invalid object passed to get method.");
             }
@@ -74,7 +74,7 @@ namespace DataTransferObject
                 List<object> args = new();
                 foreach (ReflectionParameter parameter in constructorParams)
                 {
-                    if (has(parameter.ParameterType()))
+                    if (Has(parameter.ParameterType()))
                     {
                        
                         object dependency;
@@ -82,18 +82,16 @@ namespace DataTransferObject
 
                         if (isRecursive)
                         {
-                            throw new UnresolvableRecursionException("Recursive DTO dependencies not allowed in DTO constructor");
+                            throw new UnresolvableRecursionException($"Recursive DTO dependencies not allowed in DTO constructor: [{id} -> {parameter.ParameterType()}]");
                         }
 
                         args.Add(dependency);
                     }
                     else
                     {
-                        var generatedParamenter = Composer.Formulate(parameter.ParameterType());
+                        var generatedParamenter = Composer.Compose(parameter.ParameterType());
                         args.Add(generatedParamenter);
                     }
-                    //если дто, то сгенерить dto рекурсивно
-                    //буффер, чтобы предотвратить рекурсивность (isset)
 
                 }
 
@@ -110,14 +108,19 @@ namespace DataTransferObject
 
                     object? generatedField = null;
 
-                    if (has(field.FieldType()))
+                    if (Has(field.FieldType()))
                     {
 
-                        resolveDependency(id, ref result, field.FieldType(), out generatedField);
+                        bool isRecursive = resolveDependency(id, ref result, field.FieldType(), out generatedField);
+
+                        if (isRecursive)
+                        {
+                            throw new UnresolvableRecursionException($"Recursive DTO dependencies not allowed in DTO public fields: [{id} -> {field.FieldType()}]");
+                        }
                     }
                     else
                     {
-                        generatedField = Composer.Formulate(field.FieldType());
+                        generatedField = Composer.Compose(field.FieldType());
                     }
 
                     field.SetValue(result, generatedField);
@@ -134,14 +137,19 @@ namespace DataTransferObject
 
                     object? generatedProperty = null;
 
-                    if (has(property.PropertyType()))
+                    if (Has(property.PropertyType()))
                     {
 
-                        resolveDependency(id, ref result, property.PropertyType(), out generatedProperty); 
+                        bool isRecursive = resolveDependency(id, ref result, property.PropertyType(), out generatedProperty);
+
+                        if (isRecursive)
+                        {
+                            throw new UnresolvableRecursionException($"Recursive DTO dependencies not allowed in DTO public properties: [{id} -> {property.PropertyType()}]");
+                        }
                     }
                     else
                     {
-                        generatedProperty = Composer.Formulate(property.PropertyType());
+                        generatedProperty = Composer.Compose(property.PropertyType());
                     }    
                     
                     property.SetValue(result, generatedProperty);

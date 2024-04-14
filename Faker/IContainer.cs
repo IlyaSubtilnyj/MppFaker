@@ -11,12 +11,12 @@ namespace DataTransferObject
         /**
          * Finds an entry of the container by its identifier and returns it.
          */
-        public object get(Type id);
+        public object Get(Type id);
 
         /**
          * Returns true if the container can return an entry for the given identifier.
          * Returns false otherwise.
          */
-        public bool has(Type id);
+        public bool Has(Type id);
     }
 }

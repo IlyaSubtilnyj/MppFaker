@@ -14,11 +14,11 @@ namespace FakerConsolePr
         public int x = 0;
         public int z { get; set; }
 
-        public Foo f;
+        //public Foo f;
 
-        public Foo foo1 { get; set; }
+        //public Foo foo1 { get; set; }
 
-        private Foo(int x) { y = 25; this.x = x; }
+        //private Foo(int x) { y = 25; this.x = x; }
 
         public Foo(Foo foo) { 
             x = foo.x + 1;
@@ -40,12 +40,19 @@ namespace FakerConsolePr
     class A
     {
         private int x = 0;
+        public B b = new();
 
-        public B b { 
-            set {
-                x += value.x;
-            } 
+        public A(B b)
+        {
+            this.x = b.x + 1;
         }
+
+        //public B B {
+        //    get { return b; }
+        //    set {
+        //        B.x += x;
+        //    } 
+        //}
     }
 
     [Dto]
@@ -53,8 +60,10 @@ namespace FakerConsolePr
 
         public int x = 3;
 
-        public A a { get; set; }
-        public C c { get; set; }
+        public A a;
+
+        //public A a { get; set; }
+       //public C c { get; set; }
     }
 
     [Dto]
@@ -70,11 +79,10 @@ namespace FakerConsolePr
 
         static void Main(string[] args)
         {
-            Composer.load("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
+           Composer.Load("D:\\workspace\\Visual_Studio_workspace\\studing_workspace\\Faker-proj\\GeneratorsPlugin\\bin\\Debug\\net6.0\\GeneratorsPlugin.dll");
 
-            //var foo = DataTransferObject.Faker.Create<Foo>();
-            var lol2 = Composer.Formulate(typeof(Dictionary<int, int>));
-
+            var faker = new Faker();
+            A foo = faker.Create<A>();
         }
     }
 }
